@@ -1,2 +1,6 @@
-6 + 2
-6 * 2
+main(){
+float x;
+x=3.0;
+printID 3;
+
+}
