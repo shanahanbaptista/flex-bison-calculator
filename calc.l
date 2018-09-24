@@ -70,7 +70,7 @@ digit	([0-9])
 				return TOK_PRINTEXP;
 				}
 [a-zA-Z]	{
-					sscanf(yytext, "%c", &yylval.name_val);
+					//sscanf(yytext, "%c", &yylval.name_val);
 					return TOK_ID;
 					}
 

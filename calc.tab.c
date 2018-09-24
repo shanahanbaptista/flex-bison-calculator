@@ -452,7 +452,7 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    40,    40,    42,    45,    48,    51,    56,    62,    65,
-      69,    79,    84,    89,    95,   101,   107,   113,   119,   125
+      69,    83,    88,    93,    99,   106,   113,   119,   125,   131
 };
 #endif
 
@@ -1384,53 +1384,59 @@ yyreduce:
 #line 70 "calc.y"
     {
 			if(s.id_type != 1 && s.id_type != 2)
+			{
 				return typeerror("Variable is used but not declared");
-
+			}
 			if(s.id_type != s.expr_type)
-				fprintf(stdout, "Type error\n");
+			{
+				fprintf(stdout, "Type error EXP: %d ID: %d\n", s.expr_type, s.id_type);
 				return typeerror("Type error");
+			}
+
 		;}
     break;
 
   case 11:
-#line 80 "calc.y"
+#line 84 "calc.y"
     {
 			fprintf(stdout, "The value is: %.2f \n", s.value);
 		;}
     break;
 
   case 12:
-#line 85 "calc.y"
+#line 89 "calc.y"
     {
 			fprintf(stdout, "The value is %.2f\n",s.value);
 		;}
     break;
 
   case 13:
-#line 89 "calc.y"
+#line 93 "calc.y"
     {
 			fprintf(stdout, "Unable to read statement\n");
 		;}
     break;
 
   case 14:
-#line 96 "calc.y"
+#line 100 "calc.y"
     {
+			s.expr_type = s.id_type;
 			(yyval.result_val) = (float)(yyvsp[(1) - (1)].int_val);
 			s.value = (float)(yyvsp[(1) - (1)].int_val);
 		;}
     break;
 
   case 15:
-#line 102 "calc.y"
+#line 107 "calc.y"
     {
+			s.expr_type = s.id_type;
 			(yyval.result_val) = (float)(yyvsp[(1) - (1)].float_val);
 			s.value = (float)(yyvsp[(1) - (1)].float_val);
 		;}
     break;
 
   case 16:
-#line 108 "calc.y"
+#line 114 "calc.y"
     {
 			s.expr_type = s.id_type;
 			(yyval.result_val) = s.value;
@@ -1438,7 +1444,7 @@ yyreduce:
     break;
 
   case 17:
-#line 114 "calc.y"
+#line 120 "calc.y"
     {
 			(yyval.result_val) = (float)(yyvsp[(1) - (3)].result_val) * (float)(yyvsp[(3) - (3)].result_val);
 			s.value = (float)(yyvsp[(1) - (3)].result_val) * (float)(yyvsp[(3) - (3)].result_val);
@@ -1446,7 +1452,7 @@ yyreduce:
     break;
 
   case 18:
-#line 120 "calc.y"
+#line 126 "calc.y"
     {
 			s.value = (float)(yyvsp[(1) - (3)].result_val) - (float)(yyvsp[(3) - (3)].result_val);
 			(yyval.result_val) = s.value;
@@ -1454,7 +1460,7 @@ yyreduce:
     break;
 
   case 19:
-#line 125 "calc.y"
+#line 131 "calc.y"
     {
 			fprintf(stdout, "Unable to find a match\n");
 		;}
@@ -1462,7 +1468,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1466 "calc.tab.c"
+#line 1472 "calc.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1676,7 +1682,7 @@ yyreturn:
 }
 
 
-#line 130 "calc.y"
+#line 136 "calc.y"
 
 
 int typeerror(const char *s)

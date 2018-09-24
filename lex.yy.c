@@ -938,7 +938,7 @@ case 14:
 YY_RULE_SETUP
 #line 72 "calc.l"
 {
-					sscanf(yytext, "%c", &yylval.name_val);
+					//sscanf(yytext, "%c", &yylval.name_val);
 					return TOK_ID;
 					}
 	YY_BREAK

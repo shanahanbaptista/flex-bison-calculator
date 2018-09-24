@@ -31,7 +31,7 @@
 %token<float_val> FLOAT
 
 %type <result_val> expr
-%type <name_val> TOK_ID
+%type <int_val> TOK_ID
 
 %left TOK_SUB
 %left TOK_MUL
@@ -69,11 +69,15 @@ Stmt:
 		TOK_ID TOK_ASSIGN expr
 		{
 			if(s.id_type != 1 && s.id_type != 2)
+			{
 				return typeerror("Variable is used but not declared");
-
+			}
 			if(s.id_type != s.expr_type)
-				fprintf(stdout, "Type error\n");
+			{
+				fprintf(stdout, "Type error EXP: %d ID: %d\n", s.expr_type, s.id_type);
 				return typeerror("Type error");
+			}
+
 		}
 		|
 		TOK_PRINTID TOK_ID
@@ -94,12 +98,14 @@ Stmt:
 expr:
 		INT
 		{
+			s.expr_type = s.id_type;
 			$<result_val>$ = (float)$1;
 			s.value = (float)$1;
 		}
 		|
 		FLOAT
 		{
+			s.expr_type = s.id_type;
 			$<result_val>$ = (float)$1;
 			s.value = (float)$1;
 		}
