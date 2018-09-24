@@ -1,109 +1,143 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <math.h>
+	struct s s;
+	extern int line_no;
 %}
 %{
 	int yylex();
 	int yyerror(const char *s);
+	int typeerror(const char *s);
 %}
 
-%union { 
-struct {
-	char name[50];
-	int type;
-	float value;
-} s;
-int int_val;
-float float_val;
+%union {
+	struct s{
+		int id_type;
+		int expr_type;
+		double value;
+	} s;
+	int int_val;
+	float float_val;
+	float result_val;
+	char name_val;
 }
 
-%token TOK_SEMICOLON TOK_SUB TOK_MUL TOK_PRINTID TOK_PRINTEXP TOK_MAIN TOK_LB TOK_RB TOK_ASSIGN INT FLOAT
+%token TOK_SEMICOLON TOK_SUB TOK_MUL TOK_PRINTID TOK_PRINTEXP TOK_MAIN TOK_LB TOK_RB TOK_ASSIGN TOK_ID
 
-%token <s> TOK_ID
-%type <s> Stmt
-%type <s> Expr 
+%token TOK_TYPEINT TOK_TYPEFLOAT
+
+%token<int_val> INT
+%token<float_val> FLOAT
+
+%type <result_val> expr
+%type <name_val> TOK_ID
+
 %left TOK_SUB
-%left TOK_MUL 
-
-
-//%start Main
+%left TOK_MUL
 
 %%
-Prog:
+Prog:	/*Null condition*/
+		|
 		TOK_MAIN TOK_LB Vardefs Stmts TOK_RB;
 ;
+
 Vardefs:
-		/*No variable defined*/
+		/*No variables defined*/
 		|
 		Vardef TOK_SEMICOLON Vardefs;
 ;
-Vardef:		INT TOK_ID 
+
+Vardef:	TOK_TYPEINT TOK_ID
 		{
-			//TOK_ID.type = 1;
-			fprintf(stdout, "type int: \n");
+			s.id_type = 1;
 		}
 		|
-		FLOAT TOK_ID
+		TOK_TYPEFLOAT TOK_ID
 		{
-			//TOK_ID.type = 2;
-			fprintf(stdout, "type float: %f \n", $2);
+			s.id_type = 2;
 		}
-		
 ;
-Stmts: 
-| Stmt Stmts
+
+Stmts:
+		/*No statements defined*/
+		|
+		Stmt TOK_SEMICOLON Stmts
 ;
+
 Stmt:
-		
+		TOK_ID TOK_ASSIGN expr
 		{
-			fprintf(stdout, "unable to read\n");
+			if(s.id_type != 1 && s.id_type != 2)
+				return typeerror("Variable is used but not declared");
+
+			if(s.id_type != s.expr_type)
+				fprintf(stdout, "Type error\n");
+				return typeerror("Type error");
 		}
-		/*FLOAT TOK_ID TOK_ASSIGN Expr
-		| 
-		{
-			fprintf(stdout, "statement assignment \n");
-			//if(TOK_ID.type != Expr.type) then type-error;
-		}
-		|*/			
+		|
 		TOK_PRINTID TOK_ID
 		{
-			fprintf(stdout, "PrintId: The value is \n");			
+			fprintf(stdout, "The value is: %.2f \n", s.value);
 		}
 		|
-		TOK_PRINTEXP Expr 
+		TOK_PRINTEXP expr
 		{
-			fprintf(stdout, "PrintExpr: The value is %f\n",$<s.value>2);
+			fprintf(stdout, "The value is %.2f\n",s.value);
 		}
-					
+		|
+		{
+			fprintf(stdout, "Unable to read statement\n");
+		}
+
 ;
-Expr:	TOK_ID
+expr:
+		INT
 		{
-			fprintf(stdout, "in tok id:\n");
-			$<s.value>$ = $<s.value>1;
+			$<result_val>$ = (float)$1;
+			s.value = (float)$1;
 		}
 		|
-		Expr TOK_SUB Expr
-	  	{		
-			fprintf(stdout, "in tok sub:\n");
-			$<s.value>$ = $<s.value>1 - $<s.value>3;  		
+		FLOAT
+		{
+			$<result_val>$ = (float)$1;
+			s.value = (float)$1;
 		}
-		| 
-		Expr TOK_MUL Expr
+		|
+		TOK_ID
+		{
+			s.expr_type = s.id_type;
+			$<result_val>$ = s.value;
+		}
+		|
+		expr TOK_MUL expr
 	  	{
-			fprintf(stdout, "in tok mul:\n");
-			$<s.value>$ = $<s.value>1 * $<s.value>3;			
+			$<result_val>$ = (float)$1 * (float)$3;
+			s.value = (float)$1 * (float)$3;
 		}
-		
-		
-;				
+		|
+		expr TOK_SUB expr
+	  	{
+			s.value = (float)$1 - (float)$3;
+			$<result_val>$ = s.value;
+		}
+		|
+		{
+			fprintf(stdout, "Unable to find a match\n");
+		}
+;
 
 %%
 
+int typeerror(const char *s)
+{
+	printf("Line %d: %s\n", line_no, s);
+	return 0;
+}
+
 int yyerror(const char *s)
 {
-	printf("syntax error: %c\n", *s);
-;
+	printf("Parsing error: Line %d\n", line_no);
 	return 0;
 }
 
@@ -113,4 +147,3 @@ int main()
    yyparse();
    return 0;
 }
-
